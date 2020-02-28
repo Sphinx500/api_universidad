@@ -34,15 +34,15 @@ class Alumnos:
 				#PARA ELIMINAR VALORES
 				elif datos['action']=="delete":
 					matricula=datos['matricula']
-					resultAB=self.optiondelete(self.version,self.file,matricula)
+					resultAB=self.actionDelete(self.version,self.file,matricula)
 					return json.dumps(resultAB) #devuelve el resultAado del metodo
 				else: #POR SI EL COMANDO ESTA MAL
 					resultAB={}
-					resultAB['status']="Command not found"
+					resultAB['status']="Command not match, try again"
 					return json.dumps(resultAB)
 			else: #por si el token es incorrecto
 				resultA={}
-				resultA['status']="Token incorrecto"
+				resultA['status']="Token invalido"
 				return json.dumps(resultA)
 		except Exception as e:
 			resultA={}
@@ -55,7 +55,7 @@ class Alumnos:
 		try:
 				resultA=[]
 				resultAB={}
-				with open('static/csv/alumnos.csv','r') as csvfile:
+				with open('static/csv/alumnos.csv','r') as csvfile: #para abrir el archivo csv
 					reader = csv.DictReader(csvfile)
 					for row in reader: #para recorrer los datos del archivo
 						resultA.append(row)
@@ -66,7 +66,7 @@ class Alumnos:
 		except Exception as e: #Por si algo sale mal
 			resultA={}
 			resultA['version']=version
-			resultA['status']="ErrorG"
+			resultA['status']="Error"
 			return json.dumps(resultA)
 	
 #METODO PARA LA FUNCION SEARCH
@@ -75,7 +75,7 @@ class Alumnos:
 		try:
 				resultA=[]
 				resultAB={}
-				with open('static/csv/alumnos.csv','r') as csvfile:
+				with open('static/csv/alumnos.csv','r') as csvfile: #para abrir el archivo csv
 					reader = csv.DictReader(csvfile)
 					for row in reader:
 						if(matricula==row['matricula']): #compara la matricula ingresada con los datos del csv
@@ -92,7 +92,7 @@ class Alumnos:
 		except Exception as e: #Por si algo sale mal
 			resultA={}
 			resultA['version']=version
-			resultA['status']="ErrorS"
+			resultA['status']="Error"
 			return json.dumps(resultA)
 
 
@@ -108,7 +108,7 @@ class Alumnos:
 			resultAIN.append(primer_apellido)
 			resultAIN.append(segundo_apellido)
 			resultAIN.append(carrera)
-			with open('static/csv/alumnos.csv','a',newline='') as csvfile: 
+			with open('static/csv/alumnos.csv','a',newline='') as csvfile: #para abrir el archivo csv
 				writer=csv.writer(csvfile)
 				# The writerow() method writes a row of data into the specified file
 				writer.writerow(resultAIN)
@@ -126,4 +126,47 @@ class Alumnos:
 			resultA['status']="Error"
 			return json.dumps(resultA)
 
-	
+	@staticmethod
+	def actionDelete(file, matricula):
+		try:
+			result = []
+			resultC = {}
+			with open('static/csv/alumnos.csv', 'r') as csvfile:
+				reader = csv.DictReader(csvfile)
+				for row in reader:
+					if(row['matricula'] != matricula):
+						resultC['status'] = "200 Ok"
+						result.append(row)
+						resultC['alumnos'] = result
+			longitud = (len(result))
+			with open('static/csv/alumnos.csv', 'w', newline='') as csvfile:
+				writer = csv.writer(csvfile)
+				bye = []
+				bye.append("matricula")
+				bye.append("nombre")
+				bye.append("primer_apellido")
+				bye.append("segundo_apellido")
+				bye.append("carrera")
+				writer.writerow(bye)
+				data = []
+				for x in range(0, longitud):
+					data.append(result[x]['matricula'])
+					data.append(result[x]['nombre'])
+					data.append(result[x]['primer_apellido'])
+					data.append(result[x]['segundo_apellido'])
+					data.append(result[x]['carrera'])
+					writer.writerow(data)
+					data = []
+			results = []
+			resultsC = {}
+			with open('static/csv/alumnos.csv', 'r') as csvfile:
+				reader = csv.DictReader(csvfile)
+				for row in reader:
+					results.append(row)
+					resultsC['status'] = "200 Ok"
+					resultsC['alumnos'] = result
+			return resultsC
+		except Exception as e:
+			result = {}
+			result['status']="Error"
+		return result
